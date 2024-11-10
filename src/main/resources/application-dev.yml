@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: NOTEBOOK-APPLICATION
+  datasource:
+    url: jdbc:mysql://localhost:3306/inotebook
+    username: root
+    password: Manish@321
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect

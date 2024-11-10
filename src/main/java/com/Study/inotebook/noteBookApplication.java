@@ -2,12 +2,14 @@ package com.Study.inotebook;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-public class InotebookApplication {
+@EnableJpaAuditing
+public class noteBookApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(InotebookApplication.class, args);
+		SpringApplication.run(noteBookApplication.class, args);
 	}
 
 }
