@@ -19,12 +19,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
-        UserDTO response = userService.createUser(userDTO);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         UserDTO response = userService.getUserById(id);
