@@ -1,14 +1,17 @@
 package com.Study.inotebook.Service.ServiceImpl;
 
-import com.Study.inotebook.DTO.UserDTO;
+import com.Study.inotebook.Exceptions.UnauthorizedException;
+import com.Study.inotebook.Payload.UpdateUserRequest;
 import com.Study.inotebook.Entities.User;
 import com.Study.inotebook.Exceptions.UserNotFoundException;
+import com.Study.inotebook.Payload.UserResponse;
 import com.Study.inotebook.Repository.UserRepository;
 import com.Study.inotebook.Service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import io.micrometer.common.util.StringUtils;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,52 +21,63 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final ModelMapper modelMapper;
-
     @Override
-    public UserDTO getUserById(Long id) {
+    public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException("user not found with this userId "));
-        return modelMapper.map(user,UserDTO.class);
+        return mapToUserResponse(user);
     }
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(user -> modelMapper.map(user,UserDTO.class))
+    public List<UserResponse> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).stream()
+                .map(this::mapToUserResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserDTO updateUser(Long id, UserDTO userDTO) {
+    public UserResponse updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException("user not found with this userId"));
-        updateUserData(user,userDTO);
+        updateUserData(user,request);
         User savedUser = userRepository.save(user);
-        return modelMapper.map(savedUser,UserDTO.class);
+        return mapToUserResponse(savedUser);
     }
 
-    private void updateUserData(User user, UserDTO userDTO) {
-         if(StringUtils.isNotBlank(userDTO.getFirstName()))
+    private void updateUserData(User user, UpdateUserRequest request) {
+         if(StringUtils.isNotBlank(request.getFirstName()))
          {
-             user.setFirstName(userDTO.getFirstName());
+             user.setFirstName(request.getFirstName());
          }
-        if(StringUtils.isNotBlank(userDTO.getLastName()))
+        if(StringUtils.isNotBlank(request.getLastName()))
         {
-            user.setLastName(userDTO.getLastName());
+            user.setLastName(request.getLastName());
         }
-        if(StringUtils.isNotBlank(userDTO.getEmail()))
+        if(StringUtils.isNotBlank(request.getEmail()))
         {
-            user.setEmail(userDTO.getEmail());
+            user.setEmail(request.getEmail());
         }
-        user.setIsActive(userDTO.getIsActive());
+        user.setIsActive(request.getIsActive());
     }
 
     @Override
-    public void deleteUser(Long id) {
-        if(userRepository.existsById(id))
-        {
-            userRepository.deleteById(id);
-        }
-        throw new UserNotFoundException("user not found with this userId");
+    public void deleteUser(Long id, String requestingUsername) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with this user Id"));
 
+        if (!user.getUsername().equals(requestingUsername)) {
+            throw new UnauthorizedException("User not authorized to delete this user.");
+        }
+        userRepository.delete(user);
+    }
+    private UserResponse mapToUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .isActive(user.getIsActive())
+                .role(user.getRole())
+                .registerDate(user.getRegisterDate())
+                .build();
     }
 }

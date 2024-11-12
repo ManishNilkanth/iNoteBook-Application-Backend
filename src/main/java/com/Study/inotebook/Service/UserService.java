@@ -1,16 +1,18 @@
 package com.Study.inotebook.Service;
 
-import com.Study.inotebook.DTO.UserDTO;
+import com.Study.inotebook.Payload.UpdateUserRequest;
+import com.Study.inotebook.Payload.UserResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface UserService {
 
-    UserDTO getUserById(Long id);
+    UserResponse getUserById(Long id);
 
-    List<UserDTO> getAllUsers();
+    List<UserResponse> getAllUsers(Pageable pageable);
 
-    UserDTO updateUser(Long id, UserDTO userDTO);
+    UserResponse updateUser(Long id, UpdateUserRequest request);
 
-    void deleteUser(Long id);
+    void deleteUser(Long id, String requestingUsername);
 }

@@ -32,15 +32,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(request.getServletPath().contains("/api/v1/auth"))
         {
             filterChain.doFilter(request,response);
+            return;
         }
 
         String header = request.getHeader("Authorization");
         String jwt;
         String username;
 
-        if(header == null == !header.startsWith("Bearer "))
+        if(header == null || !header.startsWith("Bearer "))
         {
             filterChain.doFilter(request,response);
+            return;
         }
 
         jwt = header.substring(7);

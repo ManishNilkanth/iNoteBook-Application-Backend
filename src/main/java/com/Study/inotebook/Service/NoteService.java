@@ -1,21 +1,23 @@
 package com.Study.inotebook.Service;
 
-import com.Study.inotebook.DTO.NoteDTO;
+import com.Study.inotebook.Payload.NoteRequest;
+import com.Study.inotebook.Payload.NoteResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface NoteService {
-    NoteDTO createNote(NoteDTO request);
+    NoteResponse createNote(NoteRequest request);
 
-    NoteDTO getNoteById(Long noteId);
+    NoteResponse getNoteById(Long noteId);
 
-    List<NoteDTO> getAllNote();
+    List<NoteResponse> getAllNote(Pageable pageable);
 
-    List<NoteDTO> getAllNoteByUserId(Long userId);
+    List<NoteResponse> getAllNoteByUserId(Long userId);
 
-    List<NoteDTO> getAllNoteByNotebookId(Long notebookId);
+    List<NoteResponse> getAllNoteByNotebookId(Long notebookId);
 
-    NoteDTO updateNoteById(Long noteId, NoteDTO request);
+    NoteResponse updateNoteById(Long noteId, NoteRequest request);
 
-    void deleteNoteById(Long noteId);
+    void deleteNoteById(Long noteId, String requestingUsername);
 }

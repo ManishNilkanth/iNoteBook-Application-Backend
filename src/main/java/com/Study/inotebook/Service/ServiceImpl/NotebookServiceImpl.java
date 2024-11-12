@@ -1,22 +1,23 @@
 package com.Study.inotebook.Service.ServiceImpl;
 
-import com.Study.inotebook.DTO.NotebookDTO;
+import com.Study.inotebook.Exceptions.UnauthorizedException;
+import com.Study.inotebook.Payload.NoteBookRequest;
 import com.Study.inotebook.Entities.Notebook;
 import com.Study.inotebook.Entities.User;
 import com.Study.inotebook.Exceptions.NotebookNotFoundException;
 import com.Study.inotebook.Exceptions.UserNotFoundException;
+import com.Study.inotebook.Payload.NotebookResponse;
 import com.Study.inotebook.Repository.NoteBookRepository;
 import com.Study.inotebook.Repository.UserRepository;
 import com.Study.inotebook.Service.NotebookService;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,55 +27,57 @@ public class NotebookServiceImpl implements NotebookService {
     private final NoteBookRepository noteBookRepository;
 
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
+
     @Override
-    public NotebookDTO createNotebook(NotebookDTO request) {
+    public NotebookResponse createNotebook(NoteBookRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(()-> new UserNotFoundException("user is not found with this userId"));
 
-        Notebook notebook = modelMapper.map(request,Notebook.class);
+        Notebook notebook = mapToNoteBook(request);
         notebook.setUser(user);
         user.setNotebooks(new ArrayList<>(List.of(notebook)));
         Notebook savedNotebook = noteBookRepository.save(notebook);
         userRepository.save(user);
-        return modelMapper.map(savedNotebook,NotebookDTO.class);
+        return mapToNoteBookResponse(savedNotebook);
     }
 
+
+
     @Override
-    public NotebookDTO getNotebookById(Long notebookId) {
+    public NotebookResponse getNotebookById(Long notebookId) {
         Notebook notebook = noteBookRepository.findById(notebookId).
                 orElseThrow(()-> new NotebookNotFoundException("notebook is not found with this notebookId"));
-        return modelMapper.map(notebook,NotebookDTO.class);
+        return mapToNoteBookResponse(notebook);
     }
 
     @Override
-    public List<NotebookDTO> getAllNotebooks() {
-        return noteBookRepository.findAll()
+    public List<NotebookResponse> getAllNotebooks(Pageable pageable) {
+        return noteBookRepository.findAll(pageable)
                 .stream()
-                .map(notebook -> modelMapper.map(notebook,NotebookDTO.class))
+                .map(this::mapToNoteBookResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<NotebookDTO> getAllNoteBooksByUserId(Long userId) {
+    public List<NotebookResponse> getAllNoteBooksByUserId(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new UserNotFoundException("user is not found with this user Id"));
         List<Notebook> notebooks = noteBookRepository.findAllByUserId(userId).orElseGet(Collections::emptyList);
         return notebooks.stream()
-                .map(notebooks1 -> modelMapper.map(notebooks1,NotebookDTO.class))
+                .map(this::mapToNoteBookResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public NotebookDTO updateNotebookById(Long notebookId, NotebookDTO request) {
+    public NotebookResponse updateNotebookById(Long notebookId, NoteBookRequest request) {
         Notebook notebook = noteBookRepository.findById(notebookId)
                 .orElseThrow(()-> new NotebookNotFoundException("notebook is not found with this notebookId"));
         updateNotebookData(notebook,request);
         Notebook savedNotebook = noteBookRepository.save(notebook);
-        return modelMapper.map(savedNotebook,NotebookDTO.class);
+        return mapToNoteBookResponse(savedNotebook);
     }
 
-    private void updateNotebookData(Notebook notebook, NotebookDTO request) {
+    private void updateNotebookData(Notebook notebook, NoteBookRequest request) {
         if(StringUtils.isNotBlank(request.getTitle()))
         {
             notebook.setTitle(request.getTitle());
@@ -87,11 +90,34 @@ public class NotebookServiceImpl implements NotebookService {
     }
 
     @Override
-    public void deleteNotebookById(Long notebookId) {
-        if(userRepository.existsById(notebookId))
+    public void deleteNotebookById(Long notebookId, String requestingUsername) {
+        Notebook notebook = noteBookRepository.findById(notebookId)
+                .orElseThrow(()-> new NotebookNotFoundException("notebook is not found with this notebookId"));
+
+        if(!notebook.getUser().getUsername().equals(requestingUsername))
         {
-            userRepository.deleteById(notebookId);
+            throw new UnauthorizedException("User not authorized to delete this note");
         }
-        throw new NotebookNotFoundException("notebook is not found with this notebookId");
+        noteBookRepository.delete(notebook);
+    }
+
+    private NotebookResponse mapToNoteBookResponse(Notebook notebook) {
+        return NotebookResponse.builder()
+                .id(notebook.getId())
+                .userId(notebook.getUser().getId())
+                .title(notebook.getTitle())
+                .description(notebook.getDescription())
+                .isArchived(notebook.getIsArchived())
+                .createdDate(notebook.getCreatedDate())
+                .lastUpdatedDate(notebook.getLastUpdatedDate())
+                .build();
+    }
+
+    private Notebook mapToNoteBook(NoteBookRequest request) {
+        return Notebook.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .isArchived(request.getIsArchived())
+                .build();
     }
 }

@@ -1,11 +1,13 @@
-package com.Study.inotebook.DTO;
+package com.Study.inotebook.Payload;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
-public class NoteDTO {
-
-    private Long id;
+public class NoteRequest {
 
     @NotBlank(message = "Title is required")
     private String title;
@@ -13,8 +15,10 @@ public class NoteDTO {
     @NotBlank(message = "content is required")
     private String content;
 
+    @NotNull(message = "Field isFavorite is required")
     private Boolean isFavorite;
 
+    @NotNull(message = "Field isArchived is required")
     private Boolean isArchived;
 
     @NotBlank(message = "userId is required")
