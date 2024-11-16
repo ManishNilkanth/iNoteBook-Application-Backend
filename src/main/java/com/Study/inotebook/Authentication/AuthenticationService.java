@@ -50,7 +50,7 @@ public class AuthenticationService extends JwtService {
             userRepository.save(user);
         }catch (DataIntegrityViolationException e)
         {
-            throw new UserExistsWithUsernameException("user with this username is already exists. Try another username ");
+            throw new UserExistsWithUsernameException("user with this username is already exists ");
         }
         String token = jwtService.generateToken(user);
         return AuthenticationResponse.builder().accessToken(token).build();
@@ -73,7 +73,7 @@ public class AuthenticationService extends JwtService {
              return AuthenticationResponse.builder().accessToken(token).build();
          }catch (Exception e)
          {
-             throw new InvalidPasswordException("Incorrect password.");
+             throw new InvalidPasswordException("Incorrect username or password.");
          }
     }
 

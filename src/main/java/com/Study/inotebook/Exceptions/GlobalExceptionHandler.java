@@ -21,18 +21,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserExistsWithUsernameException.class)
     public ResponseEntity<String> UserExistsWithUsernameExceptionHandler(UserExistsWithUsernameException e)
     {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<String> InvalidPasswordExceptionHandler(InvalidPasswordException e)
     {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<String> UnauthorizedExceptionHandler(UnauthorizedException e)
     {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(NotebookNotFoundException.class)

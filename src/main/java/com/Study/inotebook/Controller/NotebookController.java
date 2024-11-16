@@ -15,6 +15,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notebooks")
 public class NotebookController {
