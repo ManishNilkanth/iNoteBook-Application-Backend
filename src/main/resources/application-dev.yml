@@ -1,21 +1,23 @@
+application:
+  name: NOTEBOOK-APPLICATION
 spring:
-  application:
-    name: NOTEBOOK-APPLICATION
   datasource:
-    url: jdbc:mysql://localhost:3306/inotebook
-    username: root
-    password: Manish@321
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:inotebook}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:Manish@321}
+
   jpa:
     hibernate:
       ddl-auto: 'create-drop'
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+
   mail:
     host: smtp.gmail.com
     port: 587
-    username: nilkanthmanish0@gmail.com
-    password: hftbbdlaniivgcfj
+    username: ${MAIL_USERNAME:nilkanthmanish0@gmail.com}
+    password: ${MAIL_PASSWORD:hftbbdlaniivgcfj}
     protocol: smtp
     properties:
       mail:
@@ -25,10 +27,10 @@ spring:
             enable: true
             required: true
 
-application:
+applications:
   security:
     jwt:
-      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-      expiration: 86400000 # a day
+      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      expiration: ${JWT_EXPIRATION:86400000} # a day
       refresh-token:
-        expiration: 604800000 # 7 days
+        expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days

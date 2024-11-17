@@ -29,6 +29,7 @@ public class Note {
     private Boolean isFavorite;
 
     private Boolean isArchived;
+//todo push project image on docker hub
 
     @CreatedDate
     private LocalDateTime createdDate;
